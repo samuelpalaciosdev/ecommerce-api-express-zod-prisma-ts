@@ -10,6 +10,7 @@ import authRouter from './routes/authRoutes';
 // Extra packages
 import morgan from 'morgan';
 import cookieParser from 'cookie-parser';
+import cors from 'cors';
 // Middleware
 import notFound from './middleware/notFound';
 import errorHandlerMiddleware from './middleware/error-handler';
@@ -17,6 +18,7 @@ import errorHandlerMiddleware from './middleware/error-handler';
 app.use(express.json());
 app.use(morgan('tiny'));
 app.use(cookieParser(process.env.JWT_SECRET));
+app.use(cors());
 
 app.use('/api/auth', authRouter);
 
