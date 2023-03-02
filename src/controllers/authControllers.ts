@@ -2,6 +2,9 @@ import { Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import { BadRequestError, UnauthenticatedError } from '../errors';
 import prisma from '../services/prisma';
+import { attachCookieToResponse, createTokenUser } from '../utils';
+import { checkPassword } from '../middleware/hashPassword';
+import { registerSchema } from '../types/auth';
 
 export const register = async (req: Request, res: Response) => {
   const { name, lastName, email, password } = req.body;
@@ -24,17 +27,26 @@ export const register = async (req: Request, res: Response) => {
   const isFirstAccount = (await prisma.user.count()) === 0;
   const role = isFirstAccount ? 'admin' : 'client';
 
+  // * Create user (if req.body is valid)
+  const validatedData = registerSchema.parse(req.body);
   const user = await prisma.user.create({
     data: {
-      name,
-      lastName,
-      email,
-      password,
-      role,
+      name: validatedData.name,
+      lastName: validatedData.lastName,
+      email: validatedData.email,
+      password: validatedData.password,
+      role: role,
     },
   });
 
-  return res.status(StatusCodes.CREATED).json({ status: 'success', user });
+  // * JWT
+
+  console.log(user);
+
+  const tokenUser = createTokenUser(user);
+  const token = attachCookieToResponse(res, tokenUser);
+
+  return res.status(StatusCodes.CREATED).json({ status: 'success', tokenUser });
 };
 
 export const login = async (req: Request, res: Response) => {

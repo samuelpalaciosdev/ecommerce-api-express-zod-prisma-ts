@@ -9,12 +9,14 @@ import prisma from './services/prisma';
 import authRouter from './routes/authRoutes';
 // Extra packages
 import morgan from 'morgan';
+import cookieParser from 'cookie-parser';
 // Middleware
 import notFound from './middleware/notFound';
 import errorHandlerMiddleware from './middleware/error-handler';
 
 app.use(express.json());
 app.use(morgan('tiny'));
+app.use(cookieParser(process.env.JWT_SECRET));
 
 app.use('/api/auth', authRouter);
 
