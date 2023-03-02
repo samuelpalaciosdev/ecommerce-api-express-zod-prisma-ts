@@ -7,6 +7,7 @@ const port = process.env.PORT || 5000;
 import prisma from './services/prisma';
 // Routes
 import authRouter from './routes/authRoutes';
+import userRouter from './routes/userRoutes';
 // Extra packages
 import morgan from 'morgan';
 import cookieParser from 'cookie-parser';
@@ -21,6 +22,7 @@ app.use(cookieParser(process.env.JWT_SECRET));
 app.use(cors());
 
 app.use('/api/auth', authRouter);
+app.use('/api/users', userRouter);
 
 app.get('/', (req, res) => {
   res.status(200).send('Hello world');
