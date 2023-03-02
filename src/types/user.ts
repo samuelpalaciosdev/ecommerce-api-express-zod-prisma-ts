@@ -24,3 +24,8 @@ export const updateUserSchema = z.object({
   lastName: z.string().min(1).max(35, { message: 'Last name must be less than 35 characters' }),
   email: z.string().email({ message: 'Please provide email' }),
 });
+
+export const updateUserPasswordSchema = z.object({
+  oldPassword: z.string().min(8, { message: 'Please try again, your current password is at least 8 characters long' }),
+  newPassword: z.string().min(8, { message: 'Please provide a valid password with minimum 8 characters' }),
+});

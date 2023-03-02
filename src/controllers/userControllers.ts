@@ -4,7 +4,7 @@ import { BadRequestError, UnauthenticatedError } from '../errors';
 import { checkPassword } from '../middleware/hashPassword';
 import prisma from '../services/prisma';
 import { AuthenticatedRequest } from '../types/request';
-import { updateUserSchema } from '../types/user';
+import { updateUserPasswordSchema, updateUserSchema } from '../types/user';
 import { attachCookieToResponse, createTokenUser } from '../utils';
 
 export const getAllUsers = async (req: AuthenticatedRequest, res: Response) => {
@@ -74,6 +74,9 @@ export const updateUserPassword = async (req: AuthenticatedRequest, res: Respons
   if (!isPasswordCorrect) {
     throw new UnauthenticatedError('Invalid credentials');
   }
+
+  // * Validate data with zod
+  const validatedData = updateUserPasswordSchema.parse(req.body);
 
   // * Update password
   const updatedUser = await prisma.user.update({
