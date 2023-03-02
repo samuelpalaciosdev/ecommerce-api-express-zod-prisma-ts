@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
-import { BadRequestError, UnauthenticatedError } from '../errors';
+import { BadRequestError, NotFoundError, UnauthenticatedError } from '../errors';
 import { checkPassword } from '../middleware/hashPassword';
 import prisma from '../services/prisma';
 import { AuthenticatedRequest } from '../types/request';
@@ -9,8 +9,38 @@ import { attachCookieToResponse, createTokenUser } from '../utils';
 
 export const getAllUsers = async (req: AuthenticatedRequest, res: Response) => {
   // * Get all users with role client
-  const users = await prisma.user.findMany({ where: { role: 'client' } });
+  const users = await prisma.user.findMany({
+    where: { role: 'client' },
+    select: {
+      id: true,
+      name: true,
+      lastName: true,
+      email: true,
+      isActive: true,
+      role: true,
+    },
+  });
   res.status(StatusCodes.OK).json({ status: 'success', users });
+};
+
+export const getSingleUser = async (req: AuthenticatedRequest, res: Response) => {
+  // * Find user by id
+  const { id } = req.params;
+  const user = await prisma.user.findUnique({
+    where: { id },
+    select: {
+      id: true,
+      name: true,
+      lastName: true,
+      email: true,
+      isActive: true,
+      role: true,
+    },
+  });
+  if (!user) {
+    throw new NotFoundError(`No user with id: ${id}`);
+  }
+  res.status(StatusCodes.OK).json({ status: 'success', user });
 };
 
 export const showCurrentUser = async (req: AuthenticatedRequest, res: Response) => {
