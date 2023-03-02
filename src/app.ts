@@ -4,7 +4,7 @@ import 'express-async-errors';
 import express from 'express';
 const app = express();
 const port = process.env.PORT || 5000;
-import prisma from './types/prisma';
+import prisma from './services/prisma';
 // Routes
 import authRouter from './routes/authRoutes';
 // Extra packages

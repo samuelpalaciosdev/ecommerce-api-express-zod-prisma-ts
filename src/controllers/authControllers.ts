@@ -8,9 +8,8 @@ export const register = async (req: Request, res: Response) => {
 
   // ! Check if all fields are filled
   if (!name || !lastName || !email || !password) {
-    throw new BadRequestError('Provide all fields, try again');
+    throw new BadRequestError('Please provide all fields');
   }
-
   // ! Check if email already exists
   const emailAlreadyExists = await prisma.user.findUnique({
     where: {
@@ -18,20 +17,24 @@ export const register = async (req: Request, res: Response) => {
     },
   });
   if (emailAlreadyExists) {
-    throw new BadRequestError('Email already exists, please provide other value');
+    throw new BadRequestError('Email already exists');
   }
 
-  // * Create user
+  // * Set first registered user as admin
+  const isFirstAccount = (await prisma.user.count()) === 0;
+  const role = isFirstAccount ? 'admin' : 'client';
+
   const user = await prisma.user.create({
     data: {
       name,
       lastName,
       email,
       password,
+      role,
     },
   });
 
-  res.status(StatusCodes.CREATED).json({ status: 'success', user });
+  return res.status(StatusCodes.CREATED).json({ status: 'success', user });
 };
 
 export const login = async (req: Request, res: Response) => {
