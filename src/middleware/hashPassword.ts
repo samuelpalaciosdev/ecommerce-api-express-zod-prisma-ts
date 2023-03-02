@@ -8,10 +8,13 @@ export const hashPasswordMiddleware = async (
 ) => {
   if ((params.model === 'User' && params.action === 'create') || params.action === 'update') {
     let user = params.args.data;
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(user.password, salt); // Hash the password
-
-    user.password = hashedPassword;
+    if (user.password) {
+      const salt = await bcrypt.genSalt(10);
+      console.log('user:', user);
+      const hashedPassword = await bcrypt.hash(user.password, salt); // Hash the password
+      console.log('hashedPassword:', hashedPassword);
+      user.password = hashedPassword;
+    }
   }
 
   // Call the next middleware function or Prisma method

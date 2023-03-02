@@ -32,11 +32,11 @@ export const updateUser = async (req: AuthenticatedRequest, res: Response) => {
       },
     });
 
-    console.log(updatedUser);
+    // console.log(updatedUser);
 
-    res.status(StatusCodes.OK).json({ user: req.user });
+    res.status(StatusCodes.OK).json({ user: updatedUser });
   } catch (error) {
-    console.error(error);
+    // console.error(error);
     throw new BadRequestError('Error updating user');
   }
 };
