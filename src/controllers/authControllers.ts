@@ -41,8 +41,6 @@ export const register = async (req: Request, res: Response) => {
 
   // * JWT
 
-  console.log(user);
-
   const tokenUser = createTokenUser(user);
   const token = attachCookieToResponse(res, tokenUser);
 
@@ -75,8 +73,6 @@ export const login = async (req: Request, res: Response) => {
   if (!isPasswordCorrect) {
     throw new UnauthenticatedError('Invalid credentials');
   }
-
-  console.log(user);
 
   const tokenUser = createTokenUser(user);
   const token = attachCookieToResponse(res, tokenUser);
