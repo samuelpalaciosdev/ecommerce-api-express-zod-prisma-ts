@@ -4,6 +4,7 @@ import { BadRequestError, UnauthenticatedError } from '../errors';
 import { checkPassword } from '../middleware/hashPassword';
 import prisma from '../services/prisma';
 import { AuthenticatedRequest } from '../types/request';
+import { updateUserSchema } from '../types/user';
 import { attachCookieToResponse, createTokenUser } from '../utils';
 
 export const getAllUsers = async (req: AuthenticatedRequest, res: Response) => {
@@ -20,10 +21,12 @@ export const updateUser = async (req: AuthenticatedRequest, res: Response) => {
   const { name, lastName, email } = req.body;
 
   // ! Check if all fields are provided
-  if (!name || !lastName) {
+  if (!name || !lastName || !email) {
     throw new BadRequestError('Please provide all fields');
   }
-  // !!!!!!!!!!!!!!!! ERROR, INVALID CREDENTIALS WHEN UPDATE EMAIL
+
+  // * Validate data with zod
+  const validatedData = updateUserSchema.parse(req.body);
 
   // !Check if user exists
   const user = req.user;
@@ -36,8 +39,9 @@ export const updateUser = async (req: AuthenticatedRequest, res: Response) => {
       id: user.id,
     },
     data: {
-      name,
-      lastName,
+      name: validatedData.name,
+      lastName: validatedData.lastName,
+      email: validatedData.email,
     },
   });
 
