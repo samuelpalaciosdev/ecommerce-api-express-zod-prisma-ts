@@ -6,7 +6,8 @@ import { AuthenticatedRequest } from '../types/request';
 import { attachCookieToResponse, createTokenUser } from '../utils';
 
 export const getAllUsers = async (req: AuthenticatedRequest, res: Response) => {
-  const users = await prisma.user.findMany();
+  // * Get all users with role client
+  const users = await prisma.user.findMany({ where: { role: 'client' } });
   res.status(StatusCodes.OK).json({ status: 'success', users });
 };
 
