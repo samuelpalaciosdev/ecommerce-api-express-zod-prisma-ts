@@ -10,6 +10,7 @@ export const hashPasswordMiddleware = async (
     let user = params.args.data;
     if (user.password) {
       const salt = await bcrypt.genSalt(10);
+      console.log('hey there encrypting password');
       // console.log('user:', user);
       const hashedPassword = await bcrypt.hash(user.password, salt); // Hash the password
       // console.log('hashedPassword:', hashedPassword);
