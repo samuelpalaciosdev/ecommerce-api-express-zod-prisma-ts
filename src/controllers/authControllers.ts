@@ -4,7 +4,7 @@ import { BadRequestError, UnauthenticatedError } from '../errors';
 import prisma from '../services/prisma';
 import { attachCookieToResponse, createTokenUser } from '../utils';
 import { checkPassword } from '../middleware/hashPassword';
-import { registerSchema } from '../types/auth';
+import { loginSchema, registerSchema } from '../types/auth';
 
 export const register = async (req: Request, res: Response) => {
   const { name, lastName, email, password } = req.body;
@@ -57,6 +57,9 @@ export const login = async (req: Request, res: Response) => {
     throw new BadRequestError('Provide all fields, try again');
   }
 
+  // * Validate with zod
+  const validatedData = loginSchema.parse(req.body);
+
   // ! Check if user exists
   const user = await prisma.user.findUnique({
     where: {
@@ -67,6 +70,16 @@ export const login = async (req: Request, res: Response) => {
     throw new UnauthenticatedError('Invalid credentials');
   }
 
-  // * Login user
-  res.status(StatusCodes.OK).json({ status: 'success', user });
+  // ! Check if password is correct
+  const isPasswordCorrect = await checkPassword(password, user.password);
+  if (!isPasswordCorrect) {
+    throw new UnauthenticatedError('Invalid credentials');
+  }
+
+  console.log(user);
+
+  const tokenUser = createTokenUser(user);
+  const token = attachCookieToResponse(res, tokenUser);
+
+  return res.status(StatusCodes.CREATED).json({ status: 'success', tokenUser });
 };
