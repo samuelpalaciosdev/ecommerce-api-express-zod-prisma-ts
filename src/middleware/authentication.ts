@@ -11,8 +11,6 @@ export const authenticateUser = async (req: AuthenticatedRequest, res: Response,
     throw new UnauthenticatedError('Authentication invalid');
   }
 
-  console.log('Token present');
-
   try {
     const { id, name, lastName, email, isActive, role } = isTokenValid(token) as JwtPayload;
 
