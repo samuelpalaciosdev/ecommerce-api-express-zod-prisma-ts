@@ -4,8 +4,8 @@ import { BadRequestError, NotFoundError, UnauthenticatedError } from '../errors'
 import { checkPassword } from '../middleware/hashPassword';
 import prisma from '../services/prisma';
 import { AuthenticatedRequest } from '../types/request';
-import { updateUserPasswordSchema, updateUserSchema } from '../types/user';
-import { attachCookieToResponse, createTokenUser } from '../utils';
+import { tokenUser, updateUserPasswordSchema, updateUserSchema } from '../types/user';
+import { attachCookieToResponse, createTokenUser, checkPermissions } from '../utils';
 
 export const getAllUsers = async (req: AuthenticatedRequest, res: Response) => {
   // * Get all users with role client
@@ -40,6 +40,14 @@ export const getSingleUser = async (req: AuthenticatedRequest, res: Response) =>
   if (!user) {
     throw new NotFoundError(`No user with id: ${id}`);
   }
+
+  // !Check for request user (the current logged in user that is making the request)
+  const requestUser = req.user;
+  if (!requestUser) {
+    throw new UnauthenticatedError('Invalid credentials');
+  }
+
+  checkPermissions(requestUser, user.id);
   res.status(StatusCodes.OK).json({ status: 'success', user });
 };
 
