@@ -1,7 +1,7 @@
 import { z } from 'zod';
-import { Brand } from './brand';
-import { Category } from './category';
-import { Review } from './review';
+import { brandSchema } from './brand';
+import { categorySchema } from './category';
+import { reviewSchema } from './review';
 
 export const productSchema = z.object({
   id: z.number(),
@@ -14,13 +14,13 @@ export const productSchema = z.object({
   averageRating: z.number().optional(),
   featured: z.boolean().default(false),
   inStock: z.boolean().default(true),
-  brand: Brand,
+  brand: brandSchema,
   brandId: z.string(),
-  category: Category,
+  category: categorySchema,
   categoryId: z.string(),
   createdAt: z.date().default(() => new Date()),
   updatedAt: z.date().nullable(),
-  Review: Review.array().optional(),
+  review: reviewSchema.array().optional(),
 });
 
 export type Product = z.infer<typeof productSchema>;

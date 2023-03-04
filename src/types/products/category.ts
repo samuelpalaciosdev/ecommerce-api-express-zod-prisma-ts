@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { Product } from './product';
+import { productSchema } from './product';
 
 export const categorySchema = z.object({
   id: z.string(),
@@ -7,7 +7,7 @@ export const categorySchema = z.object({
   description: z.string().max(500, { message: 'Description must be less than 500 characters' }),
   createdAt: z.date().default(() => new Date()),
   updatedAt: z.date().nullable(),
-  products: Product.array().optional(),
+  products: productSchema.array().optional(),
 });
 
 export type Category = z.infer<typeof categorySchema>;

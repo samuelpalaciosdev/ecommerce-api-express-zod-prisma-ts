@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { Order } from './order';
+import { orderSchema } from './order';
 
 export const orderItemSchema = z.object({
   id: z.string(),
@@ -8,7 +8,7 @@ export const orderItemSchema = z.object({
   price: z.number().positive(),
   createdAt: z.date().default(() => new Date()),
   updatedAt: z.date().nullable(),
-  order: Order,
+  order: orderSchema,
   orderId: z.string(),
 });
 

@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import { BadRequestError, NotFoundError } from '../errors';
 import prisma from '../services/prisma';
-import { productSchema } from '../types/products/product';
+import { productSchema, Product } from '../types/products/product';
 
 export const getAllProducts = async (req: Request, res: Response) => {
   const products = await prisma.product.findMany();

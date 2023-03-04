@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { Product } from './product';
+import { productSchema } from './product';
 
 export const brandSchema = z.object({
   id: z.string(),
@@ -8,7 +8,7 @@ export const brandSchema = z.object({
   logo: z.string(),
   createdAt: z.date().default(() => new Date()),
   updatedAt: z.date().nullable(),
-  products: Product.array().optional(),
+  products: productSchema.array().optional(),
 });
 
 export type Brand = z.infer<typeof brandSchema>;

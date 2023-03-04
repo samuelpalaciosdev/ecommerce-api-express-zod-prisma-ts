@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { User } from '../user';
-import { Product } from './product';
+import { productSchema } from './product';
 
 export const reviewSchema = z.object({
   id: z.number(),
@@ -14,7 +14,7 @@ export const reviewSchema = z.object({
   updatedAt: z.date().nullable(),
   user: User,
   userId: z.string(),
-  product: Product,
+  product: productSchema,
   productId: z.number(),
 });
 
