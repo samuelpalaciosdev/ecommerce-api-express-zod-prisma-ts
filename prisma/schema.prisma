@@ -29,20 +29,23 @@ model User {
 }
 
 model Product {
-  id          Int      @id @default(autoincrement())
-  name        String
-  description String
-  price       Int
-  image       String
-  color       String?
-  inStock     Boolean  @default(true)
-  brand       Brand    @relation(fields: [brandId], references: [id])
-  brandId     String
-  category    Category @relation(fields: [categoryId], references: [id])
-  categoryId  String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  Review      Review[]
+  id            Int      @id @default(autoincrement())
+  name          String
+  description   String
+  price         Int
+  image         String
+  color         String?
+  inventory     Int      @default(5)
+  averageRating Float
+  featured      Boolean  @default(false)
+  inStock       Boolean  @default(true)
+  brand         Brand    @relation(fields: [brandId], references: [id])
+  brandId       String
+  category      Category @relation(fields: [categoryId], references: [id])
+  categoryId    String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  Review        Review[]
 }
 
 model Brand {
