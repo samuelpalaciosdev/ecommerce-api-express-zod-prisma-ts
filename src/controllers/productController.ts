@@ -4,12 +4,12 @@ import { BadRequestError, NotFoundError } from '../errors';
 import prisma from '../services/prisma';
 import { productSchema } from '../types/products/product';
 
-const getAllProducts = async (req: Request, res: Response) => {
+export const getAllProducts = async (req: Request, res: Response) => {
   const products = await prisma.product.findMany();
-  res.status(200).json({ products });
+  res.status(StatusCodes.OK).json({ products });
 };
 
-const getSingleProduct = async (req: Request, res: Response) => {
+export const getSingleProduct = async (req: Request, res: Response) => {
   const { id } = req.params;
 
   // ! Check if product doesn't exist
@@ -20,10 +20,10 @@ const getSingleProduct = async (req: Request, res: Response) => {
   const product = await prisma.product.findUnique({
     where: { id: Number(id) },
   });
-  res.status(200).json({ product });
+  res.status(StatusCodes.OK).json({ product });
 };
 
-const createProduct = async (req: Request, res: Response) => {
+export const createProduct = async (req: Request, res: Response) => {
   const {
     name,
     description,
