@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import { BadRequestError, NotFoundError } from '../errors';
 import prisma from '../services/prisma';
-import { productSchema, Product } from '../types/products/product';
+import { productSchema } from '../types/product';
 
 export const getAllProducts = async (req: Request, res: Response) => {
   const products = await prisma.product.findMany();
@@ -38,19 +38,19 @@ export const createProduct = async (req: Request, res: Response) => {
   } = req.body;
 
   // ! Check if all fields are filled
-  // * Not checking color because it's optional
+  // * Not checking color because it's optional and featured because is default to false
+
   if (
     !name ||
     !description ||
     !price ||
     !image ||
     !inventory ||
-    !featured ||
     !inStock ||
     !brandId ||
     !categoryId
   ) {
-    throw new BadRequestError('Please provide  all fields');
+    throw new Error('Please provide all required fields');
   }
 
   // * Validate data with zod

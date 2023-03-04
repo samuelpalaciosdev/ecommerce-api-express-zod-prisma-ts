@@ -1,10 +1,10 @@
 import { Request, Response } from 'express';
 import prisma from '../services/prisma';
-import { brandSchema } from '../types/products/brand';
 import { BadRequestError } from '../errors';
+import { brandSchema } from '../types/brand';
 import { StatusCodes } from 'http-status-codes';
 
-export const createBrand = async (req: Request, res: Response) => {
+const createBrand = async (req: Request, res: Response) => {
   const { name, description, logo } = req.body;
 
   // ! Check if all fields are filled
@@ -15,7 +15,7 @@ export const createBrand = async (req: Request, res: Response) => {
   // * Validate with zod
   const validatedData = brandSchema.parse(req.body);
 
-  // * Create brand
+  // * Create category
   const brand = await prisma.brand.create({
     data: {
       name: validatedData.name,
@@ -26,3 +26,5 @@ export const createBrand = async (req: Request, res: Response) => {
 
   res.status(StatusCodes.CREATED).json({ status: 'success', brand });
 };
+
+export default createBrand;

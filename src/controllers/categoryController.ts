@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import { BadRequestError } from '../errors';
 import prisma from '../services/prisma';
-import { categorySchema } from '../types/products/category';
+import { categorySchema } from '../types/category';
 
 export const createCategory = async (req: Request, res: Response) => {
   const { name, description } = req.body;

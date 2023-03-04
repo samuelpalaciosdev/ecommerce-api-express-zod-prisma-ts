@@ -25,7 +25,8 @@ model User {
   isActive Boolean  @default(true)
   role     Role     @default(client)
   orders   Order[] // User orders
-  reviews  Review[] // User reviews
+  // reviews  Review[] // User reviews
+  Review   Review[]
 }
 
 model Product {
@@ -50,7 +51,7 @@ model Product {
 
 model Brand {
   id          String    @id @default(cuid())
-  name        String
+  name        String    @unique
   description String
   logo        String
   createdAt   DateTime  @default(now())
@@ -60,7 +61,7 @@ model Brand {
 
 model Category {
   id          String    @id @default(cuid())
-  name        String
+  name        String    @unique
   description String
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt

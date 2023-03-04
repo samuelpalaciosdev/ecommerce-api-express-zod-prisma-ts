@@ -44,7 +44,7 @@ export const register = async (req: Request, res: Response) => {
   const tokenUser = createTokenUser(user);
   const token = attachCookieToResponse(res, tokenUser);
 
-  return res.status(StatusCodes.CREATED).json({ status: 'success', tokenUser });
+  return res.status(StatusCodes.CREATED).json({ status: 'success', user: tokenUser });
 };
 
 export const login = async (req: Request, res: Response) => {
@@ -77,7 +77,7 @@ export const login = async (req: Request, res: Response) => {
   const tokenUser = createTokenUser(user);
   const token = attachCookieToResponse(res, tokenUser);
 
-  return res.status(StatusCodes.CREATED).json({ status: 'success', tokenUser });
+  return res.status(StatusCodes.CREATED).json({ status: 'success', user: tokenUser });
 };
 
 export const logout = async (req: Request, res: Response) => {
