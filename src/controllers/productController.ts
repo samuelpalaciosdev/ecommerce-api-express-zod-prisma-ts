@@ -1,6 +1,8 @@
 import { Request, Response } from 'express';
+import { StatusCodes } from 'http-status-codes';
 import { BadRequestError, NotFoundError } from '../errors';
 import prisma from '../services/prisma';
+import { productSchema } from '../types/products/product';
 
 const getAllProducts = async (req: Request, res: Response) => {
   const products = await prisma.product.findMany();
@@ -36,7 +38,7 @@ const createProduct = async (req: Request, res: Response) => {
   } = req.body;
 
   // ! Check if all fields are filled
-  // Not checking color because it's optional
+  // * Not checking color because it's optional
   if (
     !name ||
     !description ||
@@ -52,6 +54,24 @@ const createProduct = async (req: Request, res: Response) => {
   }
 
   // * Validate data with zod
+  const validatedData = productSchema.parse(req.body);
 
-  // const validatedData =
+  //* Create product
+  const product = await prisma.product.create({
+    data: {
+      name: validatedData.name,
+      description: validatedData.description,
+      price: validatedData.price,
+      image: validatedData.image,
+      color: validatedData.color,
+      inventory: validatedData.inventory,
+      averageRating: 4,
+      featured: validatedData.featured,
+      inStock: validatedData.inStock,
+      brand: { connect: { id: validatedData.brandId } },
+      category: { connect: { id: validatedData.categoryId } },
+    },
+  });
+
+  res.status(StatusCodes.CREATED).json({ status: 'success', product });
 };
