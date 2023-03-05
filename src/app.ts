@@ -15,11 +15,14 @@ import categoryRouter from './routes/categoryRoutes';
 import morgan from 'morgan';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
+import fileUpload from 'express-fileupload';
 // Middleware
 import notFound from './middleware/notFound';
 import errorHandlerMiddleware from './middleware/error-handler';
 
 app.use(express.json());
+app.use(express.static('public'))
+app.use(fileUpload());
 app.use(morgan('tiny'));
 app.use(cookieParser(process.env.JWT_SECRET));
 app.use(cors());

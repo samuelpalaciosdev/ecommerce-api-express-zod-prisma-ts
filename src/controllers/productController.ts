@@ -1,8 +1,10 @@
 import { Request, Response } from 'express';
+import { UploadedFile } from 'express-fileupload';
 import { StatusCodes } from 'http-status-codes';
 import { BadRequestError, NotFoundError } from '../errors';
 import prisma from '../services/prisma';
 import { productSchema } from '../types/product';
+import path from 'path';
 
 export const getAllProducts = async (req: Request, res: Response) => {
   const products = await prisma.product.findMany();
@@ -110,5 +112,27 @@ export const deleteProduct = async (req: Request, res: Response) => {
 };
 
 export const uploadImage = async (req: Request, res: Response) => {
-  res.status(StatusCodes.OK).json({ status: 'success', msg: 'Image uploaded!' });
+  // ! Check if image is uploaded
+  if (!req.files) {
+    throw new BadRequestError('No file uploaded');
+  }
+
+  const productImg = req.files.image as UploadedFile;
+
+  // ! Check if file is an image
+  if (!productImg.mimetype.startsWith('image')) {
+    throw new BadRequestError('Please upload an image file');
+  }
+
+  // ! Check file size
+  const maxSize = 1024 * 1024 * 2;
+
+  if (productImg.size > maxSize) {
+    throw new BadRequestError('Please upload an image less than 2MB');
+  }
+
+  const imagePath = path.join(__dirname, '../public/images/' + `${productImg.name}`);
+  await productImg.mv(imagePath);
+
+  res.status(StatusCodes.OK).json({ status: 'success', image: `/images/${productImg.name}` });
 };
