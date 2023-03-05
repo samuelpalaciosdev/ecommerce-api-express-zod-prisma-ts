@@ -21,7 +21,7 @@ CREATE TABLE "Product" (
     "description" TEXT NOT NULL,
     "price" INTEGER NOT NULL,
     "image" TEXT NOT NULL,
-    "color" TEXT,
+    "color" TEXT[],
     "inventory" INTEGER NOT NULL DEFAULT 5,
     "averageRating" DOUBLE PRECISION NOT NULL,
     "featured" BOOLEAN NOT NULL DEFAULT false,

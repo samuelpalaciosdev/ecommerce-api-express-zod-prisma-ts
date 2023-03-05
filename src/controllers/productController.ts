@@ -75,3 +75,15 @@ export const createProduct = async (req: Request, res: Response) => {
 
   res.status(StatusCodes.CREATED).json({ status: 'success', product });
 };
+
+export const updateProduct = async (req: Request, res: Response) => {
+  res.status(StatusCodes.OK).json({ status: 'success', msg: 'Product updated!' });
+};
+
+export const deleteProduct = async (req: Request, res: Response) => {
+  res.status(StatusCodes.OK).json({ status: 'success', msg: 'Product deleted!' });
+};
+
+export const uploadImage = async (req: Request, res: Response) => {
+  res.status(StatusCodes.OK).json({ status: 'success', msg: 'Image uploaded!' });
+};
