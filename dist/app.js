@@ -33,7 +33,6 @@ const express_fileupload_1 = __importDefault(require("express-fileupload"));
 // Middleware
 const notFound_1 = __importDefault(require("./middleware/notFound"));
 const error_handler_1 = __importDefault(require("./middleware/error-handler"));
-const corsOptions_1 = require("./types/corsOptions");
 app.use(express_1.default.json());
 app.use(express_1.default.static('public'));
 app.use((0, express_fileupload_1.default)());
@@ -42,7 +41,10 @@ app.use((0, cookie_parser_1.default)([
     process.env.ACCESS_TOKEN_SECRET,
     process.env.REFRESH_TOKEN_SECRET,
 ]));
-app.use((0, cors_1.default)(corsOptions_1.corsOptions));
+app.use((0, cors_1.default)({
+    origin: 'http://localhost:5173',
+    credentials: true,
+}));
 app.use('/api/auth', authRoutes_1.default);
 app.use('/api/users', userRoutes_1.default);
 app.use('/api/products', productRoutes_1.default);
