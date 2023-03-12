@@ -55,39 +55,39 @@ export const showCurrentUser = async (req: AuthenticatedRequest, res: Response) 
   res.status(StatusCodes.OK).json({ user: req.user });
 };
 
-// export const updateUser = async (req: AuthenticatedRequest, res: Response) => {
-//   const { name, lastName, email } = req.body;
+export const updateUser = async (req: AuthenticatedRequest, res: Response) => {
+  const { name, lastName, email } = req.body;
 
-//   // ! Check if all fields are provided
-//   if (!name || !lastName || !email) {
-//     throw new BadRequestError('Please provide all fields');
-//   }
+  // ! Check if all fields are provided
+  if (!name || !lastName || !email) {
+    throw new BadRequestError('Please provide all fields');
+  }
 
-//   // * Validate data with zod
-//   const validatedData = updateUserSchema.parse(req.body);
+  // * Validate data with zod
+  const validatedData = updateUserSchema.parse(req.body);
 
-//   // !Check if user exists
-//   const user = req.user;
-//   if (!user) {
-//     throw new UnauthenticatedError('Invalid credentials');
-//   }
+  // !Check if user exists
+  const user = req.user;
+  if (!user) {
+    throw new UnauthenticatedError('Invalid credentials');
+  }
 
-//   const updatedUser = await prisma.user.update({
-//     where: {
-//       id: user.id,
-//     },
-//     data: {
-//       name: validatedData.name,
-//       lastName: validatedData.lastName,
-//       email: validatedData.email,
-//     },
-//   });
+  const updatedUser = await prisma.user.update({
+    where: {
+      id: user.id,
+    },
+    data: {
+      name: validatedData.name,
+      lastName: validatedData.lastName,
+      email: validatedData.email,
+    },
+  });
 
-//   const tokenUser = createTokenUser(updatedUser);
-//   const token = attachCookieToResponse(res, tokenUser);
+  const tokenUser = createTokenUser(updatedUser);
+  const token = attachCookieToResponse(res, tokenUser);
 
-//   return res.status(StatusCodes.OK).json({ status: 'success', tokenUser });
-// };
+  return res.status(StatusCodes.OK).json({ status: 'success', user: tokenUser });
+};
 
 export const updateUserPassword = async (req: AuthenticatedRequest, res: Response) => {
   const { oldPassword, newPassword } = req.body;

@@ -10,7 +10,7 @@ export const createJWT = (payload: tokenUser, refreshToken?: string) => {
 
 export const isTokenValid = (token: string) => jwt.verify(token, process.env.JWT_SECRET as string);
 
-export const attachCookieToResponse = (res: Response, user: tokenUser, refreshToken: string) => {
+export const attachCookieToResponse = (res: Response, user: tokenUser, refreshToken?: string) => {
   // * Create token
   const accessTokenJWT = createJWT(user);
   const refreshTokenJWT = createJWT(user, refreshToken);
