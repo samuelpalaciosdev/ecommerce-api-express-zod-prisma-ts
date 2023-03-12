@@ -31,11 +31,11 @@ const authenticateUser = (req, res, next) => __awaiter(void 0, void 0, void 0, f
     const { refreshToken, accessToken } = req.signedCookies;
     try {
         if (accessToken) {
-            const _a = (0, utils_1.isTokenValid)(accessToken), { iat } = _a, user = __rest(_a, ["iat"]);
+            const _a = (0, utils_1.isTokenValid)(accessToken, process.env.ACCESS_TOKEN_SECRET), { iat } = _a, user = __rest(_a, ["iat"]);
             req.user = user;
             return next();
         }
-        const _b = (0, utils_1.isTokenValid)(refreshToken), { iat } = _b, user = __rest(_b, ["iat"]);
+        const _b = (0, utils_1.isTokenValid)(refreshToken, process.env.REFRESH_TOKEN_SECRET), { iat } = _b, user = __rest(_b, ["iat"]);
         const existingToken = yield prisma_1.default.token.findFirst({
             where: {
                 user: {

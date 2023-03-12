@@ -5,17 +5,17 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.attachCookieToResponse = exports.isTokenValid = exports.createJWT = void 0;
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
-const createJWT = (payload, refreshToken) => {
-    const token = jsonwebtoken_1.default.sign(payload, process.env.JWT_SECRET);
+const createJWT = (payload, secretKey, refreshToken) => {
+    const token = jsonwebtoken_1.default.sign(payload, secretKey);
     return token;
 };
 exports.createJWT = createJWT;
-const isTokenValid = (token) => jsonwebtoken_1.default.verify(token, process.env.JWT_SECRET);
+const isTokenValid = (token, secretKey) => jsonwebtoken_1.default.verify(token, secretKey);
 exports.isTokenValid = isTokenValid;
 const attachCookieToResponse = (res, user, refreshToken) => {
     // * Create token
-    const accessTokenJWT = (0, exports.createJWT)(user);
-    const refreshTokenJWT = (0, exports.createJWT)(user, refreshToken);
+    const accessTokenJWT = (0, exports.createJWT)(user, process.env.ACCESS_TOKEN_SECRET);
+    const refreshTokenJWT = (0, exports.createJWT)(user, process.env.REFRESH_TOKEN_SECRET, refreshToken);
     // * Sending tokens as cookies
     //* Access token
     const twentyMins = 1000 * 60 * 20; // 20mins in ms

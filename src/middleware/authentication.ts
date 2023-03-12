@@ -11,11 +11,17 @@ const authenticateUser = async (req: AuthenticatedRequest, res: Response, next: 
 
   try {
     if (accessToken) {
-      const { iat, ...user } = isTokenValid(accessToken) as AuthenticatedUser;
+      const { iat, ...user } = isTokenValid(
+        accessToken,
+        process.env.ACCESS_TOKEN_SECRET as string
+      ) as AuthenticatedUser;
       req.user = user;
       return next();
     }
-    const { iat, ...user } = isTokenValid(refreshToken) as AuthenticatedUser;
+    const { iat, ...user } = isTokenValid(
+      refreshToken,
+      process.env.REFRESH_TOKEN_SECRET as string
+    ) as AuthenticatedUser;
 
     const existingToken = await prisma.token.findFirst({
       where: {

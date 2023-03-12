@@ -30,10 +30,9 @@ const express_1 = __importDefault(require("express"));
 const authentication_1 = __importStar(require("../middleware/authentication"));
 const userControllers_1 = require("../controllers/userControllers");
 const router = express_1.default.Router();
-// updateUser, //! Implement with refreshToken
 router.route('/').get(authentication_1.default, (0, authentication_1.authorizePermissions)('admin'), userControllers_1.getAllUsers);
 router.route('/me').get(authentication_1.default, userControllers_1.showCurrentUser);
-// router.route('/update').patch(authenticateUser, updateUser);
+router.route('/update').patch(authentication_1.default, userControllers_1.updateUser);
 router.route('/updatePassword').patch(authentication_1.default, userControllers_1.updateUserPassword);
 router.route('/:id').get(authentication_1.default, userControllers_1.getSingleUser);
 exports.default = router;

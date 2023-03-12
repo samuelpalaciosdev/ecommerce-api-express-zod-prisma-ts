@@ -3,17 +3,17 @@ import jwt from 'jsonwebtoken';
 import { refreshToken } from '../types/refreshToken';
 import { tokenUser } from '../types/user';
 
-export const createJWT = (payload: tokenUser, refreshToken?: string) => {
-  const token = jwt.sign(payload, process.env.JWT_SECRET as string);
+export const createJWT = (payload: tokenUser, secretKey: string, refreshToken?: string) => {
+  const token = jwt.sign(payload, secretKey);
   return token;
 };
 
-export const isTokenValid = (token: string) => jwt.verify(token, process.env.JWT_SECRET as string);
+export const isTokenValid = (token: string, secretKey: string) => jwt.verify(token, secretKey);
 
 export const attachCookieToResponse = (res: Response, user: tokenUser, refreshToken?: string) => {
   // * Create token
-  const accessTokenJWT = createJWT(user);
-  const refreshTokenJWT = createJWT(user, refreshToken);
+  const accessTokenJWT = createJWT(user, process.env.ACCESS_TOKEN_SECRET as string);
+  const refreshTokenJWT = createJWT(user, process.env.REFRESH_TOKEN_SECRET as string, refreshToken);
 
   // * Sending tokens as cookies
 
