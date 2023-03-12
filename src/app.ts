@@ -19,13 +19,14 @@ import fileUpload from 'express-fileupload';
 // Middleware
 import notFound from './middleware/notFound';
 import errorHandlerMiddleware from './middleware/error-handler';
+import { corsOptions } from './types/corsOptions';
 
 app.use(express.json());
-app.use(express.static('public'))
+app.use(express.static('public'));
 app.use(fileUpload());
 app.use(morgan('tiny'));
 app.use(cookieParser(process.env.JWT_SECRET));
-app.use(cors());
+app.use(cors(corsOptions));
 
 app.use('/api/auth', authRouter);
 app.use('/api/users', userRouter);

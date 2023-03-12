@@ -3,15 +3,15 @@ import authenticateUser, { authorizePermissions } from '../middleware/authentica
 import {
   getAllUsers,
   getSingleUser,
+  updateUser,
   showCurrentUser,
   updateUserPassword,
 } from '../controllers/userControllers';
 const router = express.Router();
 
-// updateUser, //! Implement with refreshToken
 router.route('/').get(authenticateUser, authorizePermissions('admin'), getAllUsers);
 router.route('/me').get(authenticateUser, showCurrentUser);
-// router.route('/update').patch(authenticateUser, updateUser);
+router.route('/update').patch(authenticateUser, updateUser);
 router.route('/updatePassword').patch(authenticateUser, updateUserPassword);
 router.route('/:id').get(authenticateUser, getSingleUser);
 
