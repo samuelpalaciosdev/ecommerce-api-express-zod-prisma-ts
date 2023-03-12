@@ -136,14 +136,18 @@ export const logout = async (req: AuthenticatedRequest, res: Response) => {
     },
   });
 
-  res.cookie('accessToken', 'logout', {
+  res.clearCookie('accessToken', {
     httpOnly: true,
-    expires: new Date(Date.now()),
+    secure: true,
+    signed: true,
+    maxAge: 0,
+  });
+  res.clearCookie('refreshToken', {
+    httpOnly: true,
+    secure: true,
+    signed: true,
+    maxAge: 0,
   });
 
-  res.cookie('refreshToken', 'logout', {
-    httpOnly: true,
-    expires: new Date(Date.now()),
-  });
   res.status(StatusCodes.OK).json({ msg: 'User logged out!' });
 };

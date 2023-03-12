@@ -128,13 +128,17 @@ const logout = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             },
         },
     });
-    res.cookie('accessToken', 'logout', {
+    res.clearCookie('accessToken', {
         httpOnly: true,
-        expires: new Date(Date.now()),
+        secure: true,
+        signed: true,
+        maxAge: 0,
     });
-    res.cookie('refreshToken', 'logout', {
+    res.clearCookie('refreshToken', {
         httpOnly: true,
-        expires: new Date(Date.now()),
+        secure: true,
+        signed: true,
+        maxAge: 0,
     });
     res.status(http_status_codes_1.StatusCodes.OK).json({ msg: 'User logged out!' });
 });

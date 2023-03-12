@@ -23,7 +23,7 @@ const attachCookieToResponse = (res, user, refreshToken) => {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         signed: true,
-        expires: new Date(Date.now() + twentyMins), // accesToken expires in 20mins
+        maxAge: twentyMins, // accesToken expires in 20mins
     });
     //* Refresh token
     const threeDays = 1000 * 60 * 60 * 24 * 3; // 3 days in ms
@@ -31,7 +31,7 @@ const attachCookieToResponse = (res, user, refreshToken) => {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         signed: true,
-        expires: new Date(Date.now() + threeDays), // refreshToken expires in 3 days
+        maxAge: threeDays, // refreshToken expires in 3 days
     });
 };
 exports.attachCookieToResponse = attachCookieToResponse;
