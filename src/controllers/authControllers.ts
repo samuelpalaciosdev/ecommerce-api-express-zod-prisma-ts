@@ -5,6 +5,7 @@ import prisma from '../services/prisma';
 import { attachCookieToResponse, createTokenUser } from '../utils';
 import { checkPassword } from '../middleware/hashPassword';
 import { loginSchema, registerSchema } from '../types/auth';
+import crypto from 'crypto';
 
 export const register = async (req: Request, res: Response) => {
   const { name, lastName, email, password } = req.body;
@@ -42,7 +43,7 @@ export const register = async (req: Request, res: Response) => {
   // * JWT
 
   const tokenUser = createTokenUser(user);
-  const token = attachCookieToResponse(res, tokenUser);
+  // const token = attachCookieToResponse(res, tokenUser); // ! Single cookie
 
   return res.status(StatusCodes.CREATED).json({ status: 'success', user: tokenUser });
 };
@@ -75,7 +76,27 @@ export const login = async (req: Request, res: Response) => {
   }
 
   const tokenUser = createTokenUser(user);
-  const token = attachCookieToResponse(res, tokenUser);
+
+  // * Refresh token
+  let refreshToken = crypto.randomBytes(40).toString('hex');
+  const userAgent = req.headers['user-agent'] || '';
+  const ip = req.ip;
+
+  // * Save refresh token to db
+  await prisma.token.create({
+    data: {
+      refreshToken: refreshToken,
+      ip: ip,
+      userAgent: userAgent,
+      user: {
+        connect: {
+          id: user.id,
+        },
+      },
+    },
+  });
+
+  const token = attachCookieToResponse(res, tokenUser, refreshToken);
 
   return res.status(StatusCodes.OK).json({ status: 'success', user: tokenUser });
 };
