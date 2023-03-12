@@ -78,7 +78,31 @@ export const login = async (req: Request, res: Response) => {
   const tokenUser = createTokenUser(user);
 
   // * Refresh token
-  let refreshToken = crypto.randomBytes(40).toString('hex');
+  let refreshToken = '';
+
+  // ! Check if refresh token already exists
+  const existingToken = await prisma.token.findFirst({
+    where: {
+      user: {
+        id: user.id,
+      },
+    },
+  });
+
+  if (existingToken) {
+    const { isValid } = existingToken;
+    if (!isValid) {
+      throw new UnauthenticatedError('Invalid credentials');
+    }
+    refreshToken = existingToken.refreshToken;
+
+    const token = attachCookieToResponse(res, tokenUser, refreshToken);
+
+    res.status(StatusCodes.OK).json({ status: 'success', user: tokenUser });
+    return;
+  }
+
+  refreshToken = crypto.randomBytes(40).toString('hex');
   const userAgent = req.headers['user-agent'] || '';
   const ip = req.ip;
 
