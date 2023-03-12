@@ -6,6 +6,7 @@ import { attachCookieToResponse, createTokenUser } from '../utils';
 import { checkPassword } from '../middleware/hashPassword';
 import { loginSchema, registerSchema } from '../types/auth';
 import crypto from 'crypto';
+import { AuthenticatedRequest } from '../types/request';
 
 export const register = async (req: Request, res: Response) => {
   const { name, lastName, email, password } = req.body;
@@ -125,8 +126,22 @@ export const login = async (req: Request, res: Response) => {
   return res.status(StatusCodes.OK).json({ status: 'success', user: tokenUser });
 };
 
-export const logout = async (req: Request, res: Response) => {
-  res.cookie('token', 'logout', {
+export const logout = async (req: AuthenticatedRequest, res: Response) => {
+  // * Delete refresh token from db
+  await prisma.token.deleteMany({
+    where: {
+      user: {
+        id: req.user?.id,
+      },
+    },
+  });
+
+  res.cookie('accessToken', 'logout', {
+    httpOnly: true,
+    expires: new Date(Date.now()),
+  });
+
+  res.cookie('refreshToken', 'logout', {
     httpOnly: true,
     expires: new Date(Date.now()),
   });
