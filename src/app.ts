@@ -25,7 +25,12 @@ app.use(express.json());
 app.use(express.static('public'));
 app.use(fileUpload());
 app.use(morgan('tiny'));
-app.use(cookieParser(process.env.JWT_SECRET));
+app.use(
+  cookieParser([
+    process.env.ACCESS_TOKEN_SECRET as string,
+    process.env.REFRESH_TOKEN_SECRET as string,
+  ])
+);
 app.use(cors(corsOptions));
 
 app.use('/api/auth', authRouter);
