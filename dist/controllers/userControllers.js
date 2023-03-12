@@ -90,7 +90,7 @@ const updateUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
     });
     const tokenUser = (0, utils_1.createTokenUser)(updatedUser);
     const token = (0, utils_1.attachCookieToResponse)(res, tokenUser);
-    return res.status(http_status_codes_1.StatusCodes.OK).json({ status: 'success', tokenUser });
+    return res.status(http_status_codes_1.StatusCodes.OK).json({ status: 'success', user: tokenUser });
 });
 exports.updateUser = updateUser;
 const updateUserPassword = (req, res) => __awaiter(void 0, void 0, void 0, function* () {

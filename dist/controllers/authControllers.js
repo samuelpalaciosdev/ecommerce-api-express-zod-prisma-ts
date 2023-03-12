@@ -19,6 +19,7 @@ const prisma_1 = __importDefault(require("../services/prisma"));
 const utils_1 = require("../utils");
 const hashPassword_1 = require("../middleware/hashPassword");
 const auth_1 = require("../types/auth");
+const crypto_1 = __importDefault(require("crypto"));
 const register = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { name, lastName, email, password } = req.body;
     // ! Check if all fields are filled
@@ -50,7 +51,7 @@ const register = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     });
     // * JWT
     const tokenUser = (0, utils_1.createTokenUser)(user);
-    const token = (0, utils_1.attachCookieToResponse)(res, tokenUser);
+    // const token = attachCookieToResponse(res, tokenUser); // ! Single cookie
     return res.status(http_status_codes_1.StatusCodes.CREATED).json({ status: 'success', user: tokenUser });
 });
 exports.register = register;
@@ -77,12 +78,61 @@ const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         throw new errors_1.UnauthenticatedError('Invalid credentials');
     }
     const tokenUser = (0, utils_1.createTokenUser)(user);
-    const token = (0, utils_1.attachCookieToResponse)(res, tokenUser);
-    return res.status(http_status_codes_1.StatusCodes.CREATED).json({ status: 'success', user: tokenUser });
+    // * Refresh token
+    let refreshToken = '';
+    // ! Check if refresh token already exists
+    const existingToken = yield prisma_1.default.token.findFirst({
+        where: {
+            user: {
+                id: user.id,
+            },
+        },
+    });
+    if (existingToken) {
+        const { isValid } = existingToken;
+        if (!isValid) {
+            throw new errors_1.UnauthenticatedError('Invalid credentials');
+        }
+        refreshToken = existingToken.refreshToken;
+        const token = (0, utils_1.attachCookieToResponse)(res, tokenUser, refreshToken);
+        res.status(http_status_codes_1.StatusCodes.OK).json({ status: 'success', user: tokenUser });
+        return;
+    }
+    refreshToken = crypto_1.default.randomBytes(40).toString('hex');
+    const userAgent = req.headers['user-agent'] || '';
+    const ip = req.ip;
+    // * Save refresh token to db
+    yield prisma_1.default.token.create({
+        data: {
+            refreshToken: refreshToken,
+            ip: ip,
+            userAgent: userAgent,
+            user: {
+                connect: {
+                    id: user.id,
+                },
+            },
+        },
+    });
+    const token = (0, utils_1.attachCookieToResponse)(res, tokenUser, refreshToken);
+    return res.status(http_status_codes_1.StatusCodes.OK).json({ status: 'success', user: tokenUser });
 });
 exports.login = login;
 const logout = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    res.cookie('token', 'logout', {
+    var _a;
+    // * Delete refresh token from db
+    yield prisma_1.default.token.deleteMany({
+        where: {
+            user: {
+                id: (_a = req.user) === null || _a === void 0 ? void 0 : _a.id,
+            },
+        },
+    });
+    res.cookie('accessToken', 'logout', {
+        httpOnly: true,
+        expires: new Date(Date.now()),
+    });
+    res.cookie('refreshToken', 'logout', {
         httpOnly: true,
         expires: new Date(Date.now()),
     });
