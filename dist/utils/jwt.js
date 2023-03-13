@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.attachCookieToResponse = exports.isTokenValid = exports.createJWT = void 0;
+exports.attachNewRefreshTokenToResponse = exports.attachCookieToResponse = exports.isTokenValid = exports.createJWT = void 0;
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const createJWT = (payload, secretKey, refreshToken) => {
     const token = jsonwebtoken_1.default.sign(payload, secretKey);
@@ -23,27 +23,31 @@ const attachCookieToResponse = (res, user, refreshToken) => {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         signed: true,
+        sameSite: 'none',
         maxAge: twentyMins, // accesToken expires in 20mins
     });
     //* Refresh token
-    const threeDays = 1000 * 60 * 60 * 24 * 3; // 3 days in ms
+    const oneHour = 1000 * 60 * 60; // 1 hour in ms
     res.cookie('refreshToken', refreshTokenJWT, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         signed: true,
-        maxAge: threeDays, // refreshToken expires in 3 days
+        sameSite: 'none',
+        maxAge: oneHour, // refreshToken expires in 1 hour
     });
 };
 exports.attachCookieToResponse = attachCookieToResponse;
-// export const attachSingleCookieToResponse = (res: Response, user: tokenUser) => {
-//   // * Create token
-//   const token = createJWT(user);
-//   // * Sending token as cookie
-//   const thirtyMins = 1000 * 60 * 30; // 30mins in ms
-//   res.cookie('token', token, {
-//     httpOnly: true,
-//     expires: new Date(Date.now() + thirtyMins), // Token expires in 30mins
-//     secure: process.env.NODE_ENV === 'production', // Send cookie only over HTTPS in production env
-//     signed: true,
-//   });
-// };
+const attachNewRefreshTokenToResponse = (res, user, refreshToken) => {
+    // * Create token
+    const refreshTokenJWT = (0, exports.createJWT)(user, process.env.REFRESH_TOKEN_SECRET, refreshToken);
+    // * Sending new refreshToken as cookie
+    const oneHour = 1000 * 60 * 60; // 1 hour in ms
+    res.cookie('refreshToken', refreshTokenJWT, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        signed: true,
+        sameSite: 'none',
+        maxAge: oneHour, // refreshToken expires in 1 hour
+    });
+};
+exports.attachNewRefreshTokenToResponse = attachNewRefreshTokenToResponse;

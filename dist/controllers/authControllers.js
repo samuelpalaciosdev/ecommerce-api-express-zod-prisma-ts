@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.logout = exports.login = exports.register = void 0;
+exports.logout = exports.generateRefreshToken = exports.login = exports.register = void 0;
 const http_status_codes_1 = require("http-status-codes");
 const errors_1 = require("../errors");
 const prisma_1 = __importDefault(require("../services/prisma"));
@@ -20,6 +20,7 @@ const utils_1 = require("../utils");
 const hashPassword_1 = require("../middleware/hashPassword");
 const auth_1 = require("../types/auth");
 const crypto_1 = __importDefault(require("crypto"));
+const jwt_1 = require("../utils/jwt");
 const register = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { name, lastName, email, password } = req.body;
     // ! Check if all fields are filled
@@ -118,6 +119,57 @@ const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     return res.status(http_status_codes_1.StatusCodes.OK).json({ status: 'success', user: tokenUser });
 });
 exports.login = login;
+const generateRefreshToken = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const refreshToken = req.signedCookies;
+    // ! Check if refresh token exists
+    if (!refreshToken) {
+        throw new errors_1.UnauthenticatedError('Invalid credentials');
+    }
+    else {
+        console.log(refreshToken);
+    }
+    const user = req.user;
+    if (!user) {
+        throw new errors_1.UnauthenticatedError('Invalid credentials');
+    }
+    const tokenUser = (0, utils_1.createTokenUser)(user);
+    const existingToken = yield prisma_1.default.token.findFirst({
+        where: {
+            user: {
+                id: user === null || user === void 0 ? void 0 : user.id,
+            },
+            refreshToken: refreshToken,
+        },
+    });
+    if (!existingToken || !existingToken.isValid) {
+        throw new errors_1.UnauthenticatedError('Authentication invalid');
+    }
+    // * Create new refresh token
+    const newRefreshToken = crypto_1.default.randomBytes(40).toString('hex');
+    const userAgent = req.headers['user-agent'] || '';
+    const ip = req.ip;
+    // * Save refresh token to db
+    const updatedRefreshToken = yield prisma_1.default.token.update({
+        where: {
+            refreshToken: refreshToken,
+        },
+        data: {
+            refreshToken: newRefreshToken,
+            ip: ip,
+            userAgent: userAgent,
+            user: {
+                connect: {
+                    id: user === null || user === void 0 ? void 0 : user.id,
+                },
+            },
+        },
+    });
+    const token = (0, jwt_1.attachNewRefreshTokenToResponse)(res, tokenUser, newRefreshToken);
+    return res
+        .status(http_status_codes_1.StatusCodes.OK)
+        .json({ status: 'success', user: tokenUser, msg: 'Refresh token updated!' });
+});
+exports.generateRefreshToken = generateRefreshToken;
 const logout = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
     // * Delete refresh token from db
