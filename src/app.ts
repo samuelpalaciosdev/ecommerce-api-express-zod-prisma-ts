@@ -15,26 +15,30 @@ import categoryRouter from './routes/categoryRoutes';
 import morgan from 'morgan';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
+import helmet from 'helmet';
 import fileUpload from 'express-fileupload';
 // Middleware
 import notFound from './middleware/notFound';
 import errorHandlerMiddleware from './middleware/error-handler';
 
+app.set('trust proxy', 1);
 
+app.use(helmet());
+app.use(
+  cors({
+    origin: 'http://localhost:5173',
+    credentials: true,
+  })
+);
 app.use(express.json());
-app.use(express.static('public'));
-app.use(fileUpload());
-app.use(morgan('tiny'));
 app.use(
   cookieParser([
     process.env.ACCESS_TOKEN_SECRET as string,
     process.env.REFRESH_TOKEN_SECRET as string,
   ])
 );
-app.use(cors({
-  origin: 'http://localhost:5173',
-  credentials: true,
-}));
+app.use(fileUpload());
+app.use(morgan('tiny'));
 
 app.use('/api/auth', authRouter);
 app.use('/api/users', userRouter);
