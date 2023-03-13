@@ -7,6 +7,8 @@ import { checkPassword } from '../middleware/hashPassword';
 import { loginSchema, registerSchema } from '../types/auth';
 import crypto from 'crypto';
 import { AuthenticatedRequest } from '../types/request';
+import { User } from '../types/user';
+import { attachNewRefreshTokenToResponse } from '../utils/jwt';
 
 export const register = async (req: Request, res: Response) => {
   const { name, lastName, email, password } = req.body;
@@ -124,6 +126,64 @@ export const login = async (req: Request, res: Response) => {
   const token = attachCookieToResponse(res, tokenUser, refreshToken);
 
   return res.status(StatusCodes.OK).json({ status: 'success', user: tokenUser });
+};
+
+export const generateRefreshToken = async (req: AuthenticatedRequest, res: Response) => {
+  const refreshToken = req.signedCookies;
+
+  // ! Check if refresh token exists
+  if (!refreshToken) {
+    throw new UnauthenticatedError('Invalid credentials');
+  } else {
+    console.log(refreshToken);
+  }
+
+  const user = req.user;
+  if (!user) {
+    throw new UnauthenticatedError('Invalid credentials');
+  }
+  const tokenUser = createTokenUser(user as User);
+
+  const existingToken = await prisma.token.findFirst({
+    where: {
+      user: {
+        id: user?.id,
+      },
+      refreshToken: refreshToken,
+    },
+  });
+
+  if (!existingToken || !existingToken.isValid) {
+    throw new UnauthenticatedError('Authentication invalid');
+  }
+
+  // * Create new refresh token
+  const newRefreshToken = crypto.randomBytes(40).toString('hex');
+  const userAgent = req.headers['user-agent'] || '';
+  const ip = req.ip;
+
+  // * Save refresh token to db
+
+  const updatedRefreshToken = await prisma.token.update({
+    where: {
+      refreshToken: refreshToken,
+    },
+    data: {
+      refreshToken: newRefreshToken,
+      ip: ip,
+      userAgent: userAgent,
+      user: {
+        connect: {
+          id: user?.id,
+        },
+      },
+    },
+  });
+
+  const token = attachNewRefreshTokenToResponse(res, tokenUser, newRefreshToken);
+  return res
+    .status(StatusCodes.OK)
+    .json({ status: 'success', user: tokenUser, msg: 'Refresh token updated!' });
 };
 
 export const logout = async (req: AuthenticatedRequest, res: Response) => {
