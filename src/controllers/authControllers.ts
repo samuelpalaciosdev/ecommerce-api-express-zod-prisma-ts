@@ -128,7 +128,7 @@ export const login = async (req: Request, res: Response) => {
   return res.status(StatusCodes.OK).json({ status: 'success', user: tokenUser });
 };
 
-export const generateRefreshToken = async (req: AuthenticatedRequest, res: Response) => {
+export const generateNewRefreshToken = async (req: AuthenticatedRequest, res: Response) => {
   const refreshToken = req.signedCookies;
 
   // ! Check if refresh token exists
@@ -164,7 +164,7 @@ export const generateRefreshToken = async (req: AuthenticatedRequest, res: Respo
 
   // * Save refresh token to db
 
-  const updatedRefreshToken = await prisma.token.update({
+  const updateRefreshToken = await prisma.token.update({
     where: {
       refreshToken: refreshToken,
     },

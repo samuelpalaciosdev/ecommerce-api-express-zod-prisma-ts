@@ -5,6 +5,7 @@ import express from 'express';
 const app = express();
 const port = process.env.PORT || 5000;
 import prisma from './services/prisma';
+import corsOptions from './configs/corsOptions';
 // Routes
 import authRouter from './routes/authRoutes';
 import userRouter from './routes/userRoutes';
@@ -24,12 +25,7 @@ import errorHandlerMiddleware from './middleware/error-handler';
 app.set('trust proxy', 1);
 
 app.use(helmet());
-app.use(
-  cors({
-    origin: 'http://localhost:5173',
-    credentials: true,
-  })
-);
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(
   cookieParser([
