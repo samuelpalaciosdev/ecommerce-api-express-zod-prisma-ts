@@ -23,6 +23,7 @@ export const attachCookieToResponse = (res: Response, user: tokenUser, refreshTo
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production', // Send cookie only over HTTPS in production env
     signed: true,
+    sameSite: 'none',
     maxAge: twentyMins, // accesToken expires in 20mins
   });
   //* Refresh token
@@ -31,6 +32,7 @@ export const attachCookieToResponse = (res: Response, user: tokenUser, refreshTo
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production', // Send cookie only over HTTPS in production env
     signed: true,
+    sameSite: 'none',
     maxAge: threeDays, // refreshToken expires in 3 days
   });
 };
