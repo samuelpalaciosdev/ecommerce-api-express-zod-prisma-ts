@@ -8,7 +8,7 @@ import { loginSchema, registerSchema } from '../types/auth';
 import crypto from 'crypto';
 import { AuthenticatedRequest } from '../types/request';
 import { User } from '../types/user';
-import { attachNewRefreshTokenToResponse } from '../utils/jwt';
+import { isTokenValid, attachNewRefreshTokenToResponse } from '../utils/jwt';
 
 export const register = async (req: Request, res: Response) => {
   const { name, lastName, email, password } = req.body;
@@ -129,32 +129,39 @@ export const login = async (req: Request, res: Response) => {
 };
 
 export const generateNewRefreshToken = async (req: AuthenticatedRequest, res: Response) => {
-  const refreshToken = req.signedCookies;
+  const { refreshToken } = req.signedCookies;
+  // * Des-encrypt refresh token
+  const decodedRefreshToken = isTokenValid(refreshToken, process.env.REFRESH_TOKEN_SECRET as string) as {
+    refreshToken: string;
+  };
+
+  const refreshTokenValue = decodedRefreshToken.refreshToken;
 
   // ! Check if refresh token exists
   if (!refreshToken) {
     throw new UnauthenticatedError('Invalid credentials');
-  } else {
-    console.log(refreshToken);
   }
 
   const user = req.user;
   if (!user) {
     throw new UnauthenticatedError('Invalid credentials');
   }
-  const tokenUser = createTokenUser(user as User);
 
+  // * Find existing user refresh token
   const existingToken = await prisma.token.findFirst({
     where: {
       user: {
-        id: user?.id,
+        id: user.id,
       },
-      refreshToken: refreshToken,
+      refreshToken: refreshTokenValue,
     },
   });
+  // console.log(existingToken);
+  // console.log(`Is valid: ${existingToken?.isValid}`);
 
+  // ! Check if refresh token exists or it's valid
   if (!existingToken || !existingToken.isValid) {
-    throw new UnauthenticatedError('Authentication invalid');
+    throw new UnauthenticatedError('Authentication invalid brooooo');
   }
 
   // * Create new refresh token
@@ -162,28 +169,32 @@ export const generateNewRefreshToken = async (req: AuthenticatedRequest, res: Re
   const userAgent = req.headers['user-agent'] || '';
   const ip = req.ip;
 
-  // * Save refresh token to db
-
+  // * Update refresh token on the db
   const updateRefreshToken = await prisma.token.update({
     where: {
-      refreshToken: refreshToken,
+      refreshToken: refreshTokenValue,
     },
     data: {
       refreshToken: newRefreshToken,
       ip: ip,
       userAgent: userAgent,
-      user: {
-        connect: {
-          id: user?.id,
-        },
-      },
     },
   });
 
+  const newUser = {
+    ...user,
+    password: '',
+    refreshToken: newRefreshToken,
+    // refreshToken: newRefreshToken,
+  };
+
+  const tokenUser = createTokenUser(newUser);
+
+  // console.log('newRefreshToken:', newRefreshToken);
+  // console.log('updateRefreshToken:', updateRefreshToken);
+
   const token = attachNewRefreshTokenToResponse(res, tokenUser, newRefreshToken);
-  return res
-    .status(StatusCodes.OK)
-    .json({ status: 'success', user: tokenUser, msg: 'Refresh token updated!' });
+  return res.status(StatusCodes.OK).json({ status: 'success', msg: 'Refresh token updated!', user: tokenUser });
 };
 
 export const logout = async (req: AuthenticatedRequest, res: Response) => {

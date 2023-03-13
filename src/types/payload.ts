@@ -7,4 +7,5 @@ export interface AuthenticatedUser extends JwtPayload {
   email: string;
   isActive: boolean;
   role: string;
+  refreshToken: string;
 }

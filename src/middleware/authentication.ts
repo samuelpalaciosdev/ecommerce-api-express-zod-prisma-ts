@@ -11,36 +11,32 @@ const authenticateUser = async (req: AuthenticatedRequest, res: Response, next: 
 
   try {
     if (accessToken) {
-      const { iat, ...user } = isTokenValid(
-        accessToken,
-        process.env.ACCESS_TOKEN_SECRET as string
-      ) as AuthenticatedUser;
+      const payload = isTokenValid(accessToken, process.env.ACCESS_TOKEN_SECRET as string) as JwtPayload;
+      const user = payload.user as AuthenticatedUser;
       req.user = user;
       return next();
     }
-    const { iat, ...user } = isTokenValid(
-      refreshToken,
-      process.env.REFRESH_TOKEN_SECRET as string
-    ) as AuthenticatedUser;
 
+    const payload = isTokenValid(refreshToken, process.env.REFRESH_TOKEN_SECRET as string) as JwtPayload;
     const existingToken = await prisma.token.findFirst({
       where: {
         user: {
-          id: user.id,
+          id: payload.user.id,
         },
-        refreshToken: user.refreshToken,
+        refreshToken: payload.user.refreshToken,
       },
     });
 
-    if (!existingToken || !existingToken.isValid) {
-      throw new UnauthenticatedError('Authentication invalid');
+    if (!existingToken || !existingToken?.isValid) {
+      throw new UnauthenticatedError('Authentication Invalid');
     }
 
-    attachCookieToResponse(res, user, existingToken.refreshToken);
-
-    req.user = user;
-    return next();
+    attachCookieToResponse(res, payload.user, existingToken.refreshToken);
+    req.user = payload.user;
+    console.log('Hola from the auth middleware: success!');
+    next();
   } catch (error) {
+    console.log('Hola from the auth middleware: error!');
     throw new UnauthenticatedError('Authentication invalid');
   }
 };
