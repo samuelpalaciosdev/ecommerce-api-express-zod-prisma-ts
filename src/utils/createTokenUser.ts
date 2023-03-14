@@ -8,7 +8,6 @@ const createTokenUser = (user: User): tokenUser => {
     email: user.email,
     isActive: user.isActive,
     role: user.role,
-    refreshToken: user.refreshToken ?? null,
   };
   return tokenUser;
 };

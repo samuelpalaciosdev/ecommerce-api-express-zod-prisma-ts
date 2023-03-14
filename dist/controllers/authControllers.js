@@ -195,12 +195,10 @@ const generateNewRefreshToken = (req, res) => __awaiter(void 0, void 0, void 0, 
             userAgent: userAgent,
         },
     });
-    const newUser = Object.assign(Object.assign({}, user), { password: '', refreshToken: newRefreshToken });
-    const tokenUser = (0, utils_1.createTokenUser)(newUser);
     // console.log('newRefreshToken:', newRefreshToken);
     // console.log('updateRefreshToken:', updateRefreshToken);
-    const token = (0, jwt_1.attachNewRefreshTokenToResponse)(res, tokenUser, newRefreshToken);
-    return res.status(http_status_codes_1.StatusCodes.OK).json({ status: 'success', msg: 'Refresh token updated!', user: tokenUser });
+    const token = (0, jwt_1.attachNewRefreshTokenToResponse)(res, user, newRefreshToken);
+    return res.status(http_status_codes_1.StatusCodes.OK).json({ status: 'success', msg: 'Refresh token updated!', user });
 });
 exports.generateNewRefreshToken = generateNewRefreshToken;
 const logout = (req, res) => __awaiter(void 0, void 0, void 0, function* () {

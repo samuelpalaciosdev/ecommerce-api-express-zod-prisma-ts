@@ -8,6 +8,5 @@ export interface AuthenticatedRequest extends Request {
     email: string;
     isActive: boolean;
     role: string;
-    refreshToken?: string | null;
   };
 }

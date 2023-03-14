@@ -216,20 +216,11 @@ export const generateNewRefreshToken = async (req: AuthenticatedRequest, res: Re
     },
   });
 
-  const newUser = {
-    ...user,
-    password: '',
-    refreshToken: newRefreshToken,
-    // refreshToken: newRefreshToken,
-  };
-
-  const tokenUser = createTokenUser(newUser);
-
   // console.log('newRefreshToken:', newRefreshToken);
   // console.log('updateRefreshToken:', updateRefreshToken);
 
-  const token = attachNewRefreshTokenToResponse(res, tokenUser, newRefreshToken);
-  return res.status(StatusCodes.OK).json({ status: 'success', msg: 'Refresh token updated!', user: tokenUser });
+  const token = attachNewRefreshTokenToResponse(res, user, newRefreshToken);
+  return res.status(StatusCodes.OK).json({ status: 'success', msg: 'Refresh token updated!', user });
 };
 
 export const logout = async (req: AuthenticatedRequest, res: Response) => {

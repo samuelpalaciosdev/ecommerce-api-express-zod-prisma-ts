@@ -11,7 +11,6 @@ exports.userSchema = zod_1.z.object({
     isActive: zod_1.z.boolean().default(true),
     role: zod_1.z.string().default('client'),
     // role: z.enum(['client', 'admin', 'superAdmin']),
-    refreshToken: zod_1.z.string().nullable().optional(),
 });
 exports.updateUserSchema = zod_1.z.object({
     name: zod_1.z.string().min(1).max(35, { message: 'Name must be less than 35 characters' }),

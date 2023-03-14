@@ -9,7 +9,6 @@ export const userSchema = z.object({
   isActive: z.boolean().default(true),
   role: z.string().default('client'),
   // role: z.enum(['client', 'admin', 'superAdmin']),
-  refreshToken: z.string().nullable().optional(),
 });
 
 export type User = z.infer<typeof userSchema>;
@@ -21,7 +20,6 @@ export type tokenUser = {
   email: string;
   isActive: boolean;
   role: string;
-  refreshToken: string | null;
 };
 
 export const updateUserSchema = z.object({

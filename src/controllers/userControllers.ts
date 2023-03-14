@@ -42,20 +42,10 @@ export const getSingleUser = async (req: AuthenticatedRequest, res: Response) =>
   }
 
   // !Check for request user (the current logged in user that is making the request)
-  const currentUser = req.user;
-  if (!currentUser) {
+  const requestUser = req.user;
+  if (!requestUser) {
     throw new UnauthenticatedError('Invalid credentials');
   }
-
-  const requestUser: tokenUser = {
-    id: currentUser.id,
-    name: currentUser.name,
-    lastName: currentUser.lastName,
-    email: currentUser.email,
-    isActive: currentUser.isActive,
-    role: currentUser.role,
-    refreshToken: currentUser.refreshToken ?? null,
-  };
 
   checkPermissions(requestUser, user.id);
   res.status(StatusCodes.OK).json({ status: 'success', user });

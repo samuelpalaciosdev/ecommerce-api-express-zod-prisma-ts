@@ -36,7 +36,6 @@ const getAllUsers = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
 });
 exports.getAllUsers = getAllUsers;
 const getSingleUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a;
     // * Find user by id
     const { id } = req.params;
     const user = yield prisma_1.default.user.findUnique({
@@ -54,19 +53,10 @@ const getSingleUser = (req, res) => __awaiter(void 0, void 0, void 0, function* 
         throw new errors_1.NotFoundError(`No user with id: ${id}`);
     }
     // !Check for request user (the current logged in user that is making the request)
-    const currentUser = req.user;
-    if (!currentUser) {
+    const requestUser = req.user;
+    if (!requestUser) {
         throw new errors_1.UnauthenticatedError('Invalid credentials');
     }
-    const requestUser = {
-        id: currentUser.id,
-        name: currentUser.name,
-        lastName: currentUser.lastName,
-        email: currentUser.email,
-        isActive: currentUser.isActive,
-        role: currentUser.role,
-        refreshToken: (_a = currentUser.refreshToken) !== null && _a !== void 0 ? _a : null,
-    };
     (0, utils_1.checkPermissions)(requestUser, user.id);
     res.status(http_status_codes_1.StatusCodes.OK).json({ status: 'success', user });
 });
@@ -104,7 +94,7 @@ const updateUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
 });
 exports.updateUser = updateUser;
 const updateUserPassword = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _b;
+    var _a;
     const { oldPassword, newPassword } = req.body;
     // ! Check if all fields are provided
     if (!oldPassword || !newPassword) {
@@ -113,7 +103,7 @@ const updateUserPassword = (req, res) => __awaiter(void 0, void 0, void 0, funct
     // ! Check if user exists
     const user = yield prisma_1.default.user.findUnique({
         where: {
-            id: (_b = req.user) === null || _b === void 0 ? void 0 : _b.id,
+            id: (_a = req.user) === null || _a === void 0 ? void 0 : _a.id,
         },
     });
     if (!user) {
