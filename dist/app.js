@@ -57,7 +57,7 @@ const start = () => __awaiter(void 0, void 0, void 0, function* () {
     try {
         yield prisma_1.default.$connect();
         app.listen(port, () => {
-            console.log(`Server is running on port ${port}`);
+            console.log(`Server is running on port: ${port}`);
         });
     }
     catch (error) {
