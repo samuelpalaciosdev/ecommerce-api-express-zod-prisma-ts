@@ -23,16 +23,10 @@ import notFound from './middleware/notFound';
 import errorHandlerMiddleware from './middleware/error-handler';
 
 app.set('trust proxy', 1);
-
 app.use(helmet());
 app.use(cors(corsOptions));
 app.use(express.json());
-app.use(
-  cookieParser([
-    process.env.ACCESS_TOKEN_SECRET as string,
-    process.env.REFRESH_TOKEN_SECRET as string,
-  ])
-);
+app.use(cookieParser([process.env.ACCESS_TOKEN_SECRET as string, process.env.REFRESH_TOKEN_SECRET as string]));
 app.use(fileUpload());
 app.use(morgan('tiny'));
 
