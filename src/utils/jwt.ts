@@ -41,13 +41,14 @@ export const attachCookieToResponse = (res: Response, user: tokenUser, refreshTo
     maxAge: fiftyMins, // accesToken expires in 15mins
   });
   //* Refresh token
-  const oneHour = 1000 * 60 * 60; // 1 hour in ms
+
+  const refreshTokenExpiracy = parseInt(process.env.REFRESH_TOKEN_EXPIRES_IN as string);
   res.cookie('refreshToken', refreshTokenJWT, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production', // Send cookie only over HTTPS in production env
     signed: true,
     sameSite: 'none',
-    maxAge: oneHour, // refreshToken expires in 1 hour
+    maxAge: refreshTokenExpiracy,
   });
 };
 
@@ -59,12 +60,12 @@ export const attachNewRefreshTokenToResponse = (res: Response, user: tokenUser, 
   });
 
   // * Sending new refreshToken as cookie
-  const oneHour = 1000 * 60 * 60; // 1 hour in ms
+  const refreshTokenExpiracy = parseInt(process.env.REFRESH_TOKEN_EXPIRES_IN as string);
   res.cookie('refreshToken', refreshTokenJWT, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production', // Send cookie only over HTTPS in production env
     signed: true,
     sameSite: 'none',
-    maxAge: oneHour, // refreshToken expires in 1 hour
+    maxAge: refreshTokenExpiracy, // refreshToken expires in 1 hour
   });
 };

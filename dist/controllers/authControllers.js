@@ -89,16 +89,48 @@ const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             },
         },
     });
+    // * Check if user has a refresh token, if so, use it
     if (existingToken) {
-        const { isValid } = existingToken;
+        const { isValid, updatedAt } = existingToken;
         if (!isValid) {
             throw new errors_1.UnauthenticatedError('Invalid credentials');
         }
-        refreshToken = existingToken.refreshToken;
-        const token = (0, utils_1.attachCookieToResponse)(res, tokenUser, refreshToken);
-        res.status(http_status_codes_1.StatusCodes.OK).json({ status: 'success', user: tokenUser });
-        return;
+        const expiresAt = updatedAt.getTime() + parseInt(process.env.REFRESH_TOKEN_EXPIRES_IN);
+        // * Check if refresh token is NOT expired (if its not, use it)
+        if (expiresAt > Date.now()) {
+            refreshToken = existingToken.refreshToken;
+            const token = (0, utils_1.attachCookieToResponse)(res, tokenUser, refreshToken);
+            // console.log('Token NOT EXPIRED');
+            // console.log('Current refresh token expires at:', new Date(expiresAt).toLocaleString());
+            res.status(http_status_codes_1.StatusCodes.OK).json({ status: 'success', user: tokenUser });
+            return;
+        }
+        else {
+            // ! Existing token has expired
+            // console.log('Token EXPIRED');
+            refreshToken = crypto_1.default.randomBytes(40).toString('hex');
+            const userAgent = req.headers['user-agent'] || '';
+            const ip = req.ip;
+            // * Update refresh token on the db
+            const updatedRefreshToken = yield prisma_1.default.token.update({
+                where: {
+                    id: existingToken.id,
+                },
+                data: {
+                    refreshToken: refreshToken,
+                    isValid: true,
+                    updatedAt: new Date(),
+                    ip: req.ip,
+                    userAgent: req.headers['user-agent'] || '',
+                },
+            });
+            const expiresAt = updatedRefreshToken.updatedAt.getTime() + parseInt(process.env.REFRESH_TOKEN_EXPIRES_IN);
+            // console.log('New refresh token expires at:', new Date(expiresAt).toLocaleString());
+            const token = (0, utils_1.attachCookieToResponse)(res, tokenUser, refreshToken);
+            return res.status(http_status_codes_1.StatusCodes.OK).json({ status: 'success', user: tokenUser });
+        }
     }
+    // * No existing token for the user, generate a new one
     refreshToken = crypto_1.default.randomBytes(40).toString('hex');
     const userAgent = req.headers['user-agent'] || '';
     const ip = req.ip;
@@ -116,6 +148,7 @@ const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         },
     });
     const token = (0, utils_1.attachCookieToResponse)(res, tokenUser, refreshToken);
+    // console.log('Generated new refresh token');
     return res.status(http_status_codes_1.StatusCodes.OK).json({ status: 'success', user: tokenUser });
 });
 exports.login = login;

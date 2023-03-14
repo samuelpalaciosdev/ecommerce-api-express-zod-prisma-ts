@@ -33,13 +33,13 @@ const attachCookieToResponse = (res, user, refreshToken) => {
         maxAge: fiftyMins, // accesToken expires in 15mins
     });
     //* Refresh token
-    const oneHour = 1000 * 60 * 60; // 1 hour in ms
+    const refreshTokenExpiracy = parseInt(process.env.REFRESH_TOKEN_EXPIRES_IN);
     res.cookie('refreshToken', refreshTokenJWT, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         signed: true,
         sameSite: 'none',
-        maxAge: oneHour, // refreshToken expires in 1 hour
+        maxAge: refreshTokenExpiracy,
     });
 };
 exports.attachCookieToResponse = attachCookieToResponse;
@@ -50,13 +50,13 @@ const attachNewRefreshTokenToResponse = (res, user, refreshToken) => {
         secretKey: process.env.REFRESH_TOKEN_SECRET,
     });
     // * Sending new refreshToken as cookie
-    const oneHour = 1000 * 60 * 60; // 1 hour in ms
+    const refreshTokenExpiracy = parseInt(process.env.REFRESH_TOKEN_EXPIRES_IN);
     res.cookie('refreshToken', refreshTokenJWT, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         signed: true,
         sameSite: 'none',
-        maxAge: oneHour, // refreshToken expires in 1 hour
+        maxAge: refreshTokenExpiracy, // refreshToken expires in 1 hour
     });
 };
 exports.attachNewRefreshTokenToResponse = attachNewRefreshTokenToResponse;

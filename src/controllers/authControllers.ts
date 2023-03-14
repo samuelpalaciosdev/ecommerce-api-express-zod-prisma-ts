@@ -92,18 +92,53 @@ export const login = async (req: Request, res: Response) => {
     },
   });
 
+  // * Check if user has a refresh token, if so, use it
   if (existingToken) {
-    const { isValid } = existingToken;
+    const { isValid, updatedAt } = existingToken;
     if (!isValid) {
       throw new UnauthenticatedError('Invalid credentials');
     }
-    refreshToken = existingToken.refreshToken;
+    const expiresAt = updatedAt.getTime() + parseInt(process.env.REFRESH_TOKEN_EXPIRES_IN as string);
 
-    const token = attachCookieToResponse(res, tokenUser, refreshToken);
+    // * Check if refresh token is NOT expired (if its not, use it)
+    if (expiresAt > Date.now()) {
+      refreshToken = existingToken.refreshToken;
+      const token = attachCookieToResponse(res, tokenUser, refreshToken);
+      // console.log('Token NOT EXPIRED');
+      // console.log('Current refresh token expires at:', new Date(expiresAt).toLocaleString());
 
-    res.status(StatusCodes.OK).json({ status: 'success', user: tokenUser });
-    return;
+      res.status(StatusCodes.OK).json({ status: 'success', user: tokenUser });
+      return;
+    } else {
+      // ! Existing token has expired
+      // console.log('Token EXPIRED');
+
+      refreshToken = crypto.randomBytes(40).toString('hex');
+      const userAgent = req.headers['user-agent'] || '';
+      const ip = req.ip;
+      // * Update refresh token on the db
+      const updatedRefreshToken = await prisma.token.update({
+        where: {
+          id: existingToken.id,
+        },
+        data: {
+          refreshToken: refreshToken,
+          isValid: true,
+          updatedAt: new Date(),
+          ip: req.ip,
+          userAgent: req.headers['user-agent'] || '',
+        },
+      });
+      const expiresAt =
+        updatedRefreshToken.updatedAt.getTime() + parseInt(process.env.REFRESH_TOKEN_EXPIRES_IN as string);
+      // console.log('New refresh token expires at:', new Date(expiresAt).toLocaleString());
+
+      const token = attachCookieToResponse(res, tokenUser, refreshToken);
+      return res.status(StatusCodes.OK).json({ status: 'success', user: tokenUser });
+    }
   }
+
+  // * No existing token for the user, generate a new one
 
   refreshToken = crypto.randomBytes(40).toString('hex');
   const userAgent = req.headers['user-agent'] || '';
@@ -124,7 +159,7 @@ export const login = async (req: Request, res: Response) => {
   });
 
   const token = attachCookieToResponse(res, tokenUser, refreshToken);
-
+  // console.log('Generated new refresh token');
   return res.status(StatusCodes.OK).json({ status: 'success', user: tokenUser });
 };
 
