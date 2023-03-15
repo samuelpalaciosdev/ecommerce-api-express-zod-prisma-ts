@@ -29,7 +29,7 @@ const attachCookieToResponse = (res, user, refreshToken) => {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         signed: true,
-        // sameSite: 'none',
+        sameSite: 'none',
         maxAge: fiftyMins, // accesToken expires in 15mins
     });
     //* Refresh token
@@ -38,7 +38,7 @@ const attachCookieToResponse = (res, user, refreshToken) => {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         signed: true,
-        // sameSite: 'none',
+        sameSite: 'none',
         maxAge: refreshTokenExpiracy,
     });
 };
@@ -56,7 +56,7 @@ const attachNewRefreshTokenToResponse = (res, user, refreshToken) => {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         signed: true,
-        // sameSite: 'none',
+        sameSite: 'none',
         maxAge: refreshTokenExpiracy, // refreshToken expires in 1 hour
     });
 };
