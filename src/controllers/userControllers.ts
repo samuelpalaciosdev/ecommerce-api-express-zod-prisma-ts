@@ -52,7 +52,7 @@ export const getSingleUser = async (req: AuthenticatedRequest, res: Response) =>
 };
 
 export const showCurrentUser = async (req: AuthenticatedRequest, res: Response) => {
-  res.status(StatusCodes.OK).json({ user: req.user });
+  res.status(StatusCodes.OK).json({ status: 'success', user: req.user });
 };
 
 export const updateUser = async (req: AuthenticatedRequest, res: Response) => {
