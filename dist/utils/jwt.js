@@ -43,7 +43,7 @@ const attachCookieToResponse = (res, user, refreshToken) => {
     });
 };
 exports.attachCookieToResponse = attachCookieToResponse;
-// ! SETTING ALL TOKENS TO SAMESITE NONE FOR TESTING
+// * Setting node_env to production
 const attachNewRefreshTokenToResponse = (res, user, refreshToken) => {
     // * Create token
     const refreshTokenJWT = (0, exports.createJWT)({

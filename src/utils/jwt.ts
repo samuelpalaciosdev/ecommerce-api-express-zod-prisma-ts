@@ -52,7 +52,7 @@ export const attachCookieToResponse = (res: Response, user: tokenUser, refreshTo
   });
 };
 
-// ! SETTING ALL TOKENS TO SAMESITE NONE FOR TESTING
+// * Setting node_env to production
 
 export const attachNewRefreshTokenToResponse = (res: Response, user: tokenUser, refreshToken?: string) => {
   // * Create token
